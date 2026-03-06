@@ -9,13 +9,20 @@ import {PriceConverter} from "./PriceConverter.sol";
 contract FundMe {
     using PriceConverter for uint256;
 
-    mapping(address => uint256) public addressToAmountFunded;
     address[] public funders;
 
-     uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
+    mapping(address => uint256) public addressToAmountFunded;
+    
+    uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
+
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
 
 
-     function fund() public payable {
+    function fund() public payable {
         require(msg.value.getConversionRate() >= MINIMUM_USD, "You need to spend more ETH!");
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
         funders.push(msg.sender);
@@ -53,5 +60,8 @@ contract FundMe {
        require(callSuccess, "Call failed");
 
     }
+
+
+    //Use of modifiers
 
 }
