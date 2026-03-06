@@ -34,7 +34,7 @@ contract FundMe {
         return priceFeed.version();
     }
 
-    function withdraw() public {
+    function withdraw() public onlyOwner {
         //Using for loop
         //We want to get all the money funded
 
@@ -63,5 +63,9 @@ contract FundMe {
 
 
     //Use of modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Sender is not owner!");
+        _;
+    }
 
 }
