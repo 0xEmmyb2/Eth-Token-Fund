@@ -6,6 +6,10 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 import {PriceConverter} from "./PriceConverter.sol";
 
 
+error NotOwner();
+error MinimumNotReached();
+
+//814618 gas
 contract FundMe {
     using PriceConverter for uint256;
 
@@ -13,17 +17,16 @@ contract FundMe {
 
     mapping(address => uint256) public addressToAmountFunded;
     
-    uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
+    uint256 public constant  MINIMUM_USD = 5 * 10 ** 18;
 
-    address public owner;
+    address public immutable i_owner;
 
     constructor() {
-        owner = msg.sender;
+        i_owner = msg.sender;
     }
 
 
-    function fund() public payable {
-        require(msg.value.getConversionRate() >= MINIMUM_USD, "You need to spend more ETH!");
+    function fund() public payable  minimum{
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] += msg.value;
@@ -63,9 +66,24 @@ contract FundMe {
 
 
     //Use of modifiers
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Sender is not owner!");
+    modifier  onlyOwner {
+        if(msg.sender != i_owner) revert NotOwner();
         _;
+    }
+
+    modifier  minimum{
+        if(msg.value.getConversionRate() >= MINIMUM_USD) revert MinimumNotReached();
+        _;
+    }
+
+    //receive() and fallback()
+
+    receive() external payable {
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
     }
 
 }
